@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SYXX - Официальный магазин</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background-color: #fafafa;
+        }
+
+        .header {
+            background-color: white;
+            padding: 20px;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+
+        .logo {
+            width: 120px;
+            height: auto;
+        }
+
+        .container {
+            display: flex;
+            margin-top: 80px;
+        }
+
+        .nav-sidebar {
+            width: 200px;
+            height: calc(100vh - 80px);
+            padding: 20px;
+            background-color: white;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            position: fixed;
+            left: 0;
+        }
+
+        .nav-sidebar ul {
+            list-style: none;
+        }
+
+        .nav-sidebar li {
+            margin: 15px 0;
+            cursor: pointer;
+            padding: 8px;
+            transition: background 0.3s;
+        }
+
+        .nav-sidebar li:hover {
+            background: #f5f5f5;
+        }
+
+        .cart, .checkout-btn, .add-to-cart-btn {
+            cursor: pointer;
+            padding: 10px 20px;
+            background-color: black;
+            color: white;
+            border-radius: 20px;
+            transition: opacity 0.3s;
+            border: none;
+            font-size: 16px;
+        }
+
+        .cart:hover, .checkout-btn:hover, .add-to-cart-btn:hover {
+            opacity: 0.9;
+        }
+
+        .main-content {
+            flex: 1;
+            margin-left: 200px;
+            padding: 30px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            max-width: 1200px;
+            margin: 80px auto 0;
+        }
+
+        .product-card {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: transform 0.3s;
+            position: relative;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .product-card img {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            margin-bottom: 15px;
+            border-radius: 5px;
+        }
+
+        .add-to-cart-btn {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            padding: 8px 15px;
+            font-size: 14px;
+            border-radius: 15px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1001;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 600px;
+            width: 90%;
+            position: relative;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            cursor: pointer;
+            font-size: 24px;
+            padding: 5px;
+        }
+
+        /* Стили для слайдера */
+        .slider-container {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            overflow: hidden;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .slider-track {
+            display: flex;
+            transition: transform 0.5s ease-in-out;
+            height: 100%;
+        }
+
+        .slider-image {
+            min-width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .slider-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 10px;
+        }
+
+        .slider-btn {
+            background: rgba(0,0,0,0.5);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+            border-radius: 50%;
+            transition: background 0.3s;
+        }
+
+        .slider-btn:hover {
+            background: rgba(0,0,0,0.8);
+        }
+
+        .slider-dots {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 5px;
+        }
+
+        .slider-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.5);
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .slider-dot.active {
+            background: rgba(255,255,255,0.9);
+        }
+
+        .cart-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1002;
+        }
+
+        .cart-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 10px 0;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .checkout-btn {
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        .cart-total {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .nav-sidebar {
+                position: static;
+                width: 100%;
+                height: auto;
+                box-shadow: none;
+                margin-bottom: 20px;
+            }
+
+            .main-content {
+                margin-left: 0;
+                grid-template-columns: repeat(2, 1fr);
+                padding: 15px;
+            }
+
+            .slider-container {
+                height: 300px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .header {
+                padding: 15px;
+            }
+
+            .logo {
+                width: 100px;
+            }
+
+            .cart {
+                padding: 8px 15px;
+                font-size: 14px;
+            }
+
+            .add-to-cart-btn {
+                padding: 6px 12px;
+                font-size: 12px;
+                bottom: 15px;
+                right: 15px;
+            }
+
+            .slider-container {
+                height: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <img src="logo.png" alt="SYXX Logo" class="logo">
+        <div class="cart" onclick="openCart()">Корзина (0)</div>
+    </header>
+
+    <div class="container">
+        <nav class="nav-sidebar">
+            <ul>
+                <li onclick="filterProducts('all')">Все</li>
+                <li onclick="filterProducts('t-shirts')">Футболки</li>
+                <li onclick="filterProducts('hoodies')">Худи</li>
+                <li onclick="filterProducts('pants')">Штаны</li>
+                <li onclick="filterProducts('knitwear')">Вязанные изделия</li>
+                <li onclick="filterProducts('outerwear')">Куртки и верхняя одежда</li>
+                <li onclick="filterProducts('accessories')">Сумки и аксессуары</li>
+            </ul>
+        </nav>
+
+        <main class="main-content" id="productsContainer">
+            <!-- Товары генерируются через JS -->
+        </main>
+    </div>
+
+    <!-- Модальное окно товара -->
+    <div class="modal" id="productModal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <h2 id="productTitle"></h2>
+            
+            <div class="slider-container">
+                <div class="slider-track" id="sliderTrack"></div>
+                <div class="slider-nav">
+                    <button class="slider-btn" onclick="prevSlide()">❮</button>
+                    <button class="slider-btn" onclick="nextSlide()">❯</button>
+                </div>
+                <div class="slider-dots" id="sliderDots"></div>
+            </div>
+
+            <p id="productDescription"></p>
+            <p id="productPrice" data-id=""></p>
+            <button class="checkout-btn" onclick="addToCart()">Добавить в корзину</button>
+        </div>
+    </div>
+
+    <!-- Модальное окно корзины -->
+    <div class="cart-modal" id="cartModal">
+        <div class="cart-content">
+            <span class="close-btn" onclick="closeCart()">&times;</span>
+            <h2>Корзина</h2>
+            <div id="cartItemsList"></div>
+            <div class="cart-total" id="cartTotal">
+                Итого: 0 руб
+            </div>
+            <button class="checkout-btn" onclick="handleCheckout()">Оформить заказ</button>
+        </div>
+    </div>
+
+    <script>
+        let cartItems = [];
+        let currentSlide = 0;
+        let totalSlides = 0;
+        
+        const products = [
+            {
+                id: 1,
+                category: 't-shirts',
+                title: 'Футболка Classic',
+                description: '100% хлопок, оверсайз',
+                price: '2990 руб',
+                images: [
+                    't-shirt1-1.jpg',
+                    't-shirt1-2.jpg',
+                    't-shirt1-3.jpg'
+                ]
+            },
+            {
+                id: 2,
+                category: 'hoodies',
+                title: 'Худи Oversize',
+                description: 'Хлопок 80%, полиэстер 20%',
+                price: '5990 руб',
+                images: [
+                    'hoodie1-1.jpg',
+                    'hoodie1-2.jpg'
+                ]
+            }
+        ];
+
+        function renderProducts(category = 'all') {
+            const container = document.getElementById('productsContainer');
+            container.innerHTML = '';
+            
+            const filtered = category === 'all' 
+                ? products 
+                : products.filter(p => p.category === category);
+
+            filtered.forEach(product => {
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                card.innerHTML = `
+                    <img src="${product.images[0]}" alt="${product.title}">
+                    <h3>${product.title}</h3>
+                    <p>${product.price}</p>
+                    <button class="add-to-cart-btn" data-id="${product.id}">В корзину</button>
+                `;
+                
+                card.onclick = (e) => {
+                    if(!e.target.classList.contains('add-to-cart-btn')) {
+                        showProduct(product.id);
+                    }
+                };
+
+                const quickAddBtn = card.querySelector('.add-to-cart-btn');
+                quickAddBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    addToCartDirect(product.id);
+                };
+
+                container.appendChild(card);
+            });
+        }
+
+        function showProduct(id) {
+            const product = products.find(p => p.id === id);
+            if (!product) return;
+
+            const sliderTrack = document.getElementById('sliderTrack');
+            const sliderDots = document.getElementById('sliderDots');
+            sliderTrack.innerHTML = '';
+            sliderDots.innerHTML = '';
+
+            product.images.forEach((img, index) => {
+                sliderTrack.innerHTML += `
+                    <img src="${img}" class="slider-image" alt="${product.title} ${index + 1}">
+                `;
+                
+                sliderDots.innerHTML += `
+                    <div class="slider-dot ${index === 0 ? 'active' : ''}" 
+                         onclick="goToSlide(${index})"></div>
+                `;
+            });
+
+            totalSlides = product.images.length;
+            currentSlide = 0;
+            updateSlider();
+
+            document.getElementById('productModal').style.display = 'flex';
+            document.getElementById('productTitle').textContent = product.title;
+            document.getElementById('productDescription').textContent = product.description;
+            document.getElementById('productPrice').textContent = product.price;
+            document.getElementById('productPrice').dataset.id = product.id;
+        }
+
+        function updateSlider() {
+            const sliderTrack = document.getElementById('sliderTrack');
+            const dots = document.querySelectorAll('.slider-dot');
+            
+            sliderTrack.style.transform = `translateX(-${currentSlide * 100}%)`;
+            
+            dots.forEach((dot, index) => {
+                dot.classList.toggle('active', index === currentSlide);
+            });
+        }
+
+        function nextSlide() {
+            currentSlide = (currentSlide + 1) % totalSlides;
+            updateSlider();
+        }
+
+        function prevSlide() {
+            currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
+            updateSlider();
+        }
+
+        function goToSlide(index) {
+            currentSlide = index;
+            updateSlider();
+        }
+
+        function addToCartDirect(productId) {
+            const product = products.find(p => p.id === productId);
+            if (product) {
+                cartItems.push(product);
+                updateCartDisplay();
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('productModal').style.display = 'none';
+        }
+
+        function openCart() {
+            document.getElementById('cartModal').style.display = 'flex';
+            updateCartDisplay();
+        }
+
+        function closeCart() {
+            document.getElementById('cartModal').style.display = 'none';
+        }
+
+        function addToCart() {
+            const productId = parseInt(document.getElementById('productPrice').dataset.id);
+            const product = products.find(p => p.id === productId);
+            if (product) {
+                cartItems.push(product);
+                updateCartDisplay();
+                closeModal();
+            }
+        }
+
+        function removeFromCart(index) {
+            cartItems.splice(index, 1);
+            updateCartDisplay();
+        }
+
+        function updateCartDisplay() {
+            const container = document.getElementById('cartItemsList');
+            container.innerHTML = '';
+            
+            let total = 0;
+            
+            cartItems.forEach((item, index) => {
+                const price = parseInt(item.price.replace(/\D/g, ''));
+                total += price;
+                
+                const div = document.createElement('div');
+                div.className = 'cart-item';
+                div.innerHTML = `
+                    <div>
+                        <h4>${item.title}</h4>
+                        <p>${item.price}</p>
+                    </div>
+                    <button class="checkout-btn" onclick="removeFromCart(${index})">Удалить</button>
+                `;
+                container.appendChild(div);
+            });
+            
+            document.getElementById('cartTotal').textContent = 
+                `Итого: ${total.toLocaleString('ru-RU')} руб`;
+            
+            document.querySelector('.cart').textContent = 
+                `Корзина (${cartItems.length})`;
+        }
+
+        function handleCheckout() {
+            if (cartItems.length === 0) return;
+            
+            const message = `Новый заказ:\n${cartItems.map(item => 
+                `- ${item.title} (${item.price})`
+            ).join('\n')}`;
+            
+            const tgLink = `https://t.me/givememmw?text=${encodeURIComponent(message)}`;
+            window.open(tgLink, '_blank');
+            
+            cartItems = [];
+            updateCartDisplay();
+            closeCart();
+        }
+
+        function filterProducts(category) {
+            renderProducts(category);
+        }
+
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderProducts();
+        });
+    </script>
+</body>
+</html>
